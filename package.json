@@ -1,0 +1,32 @@
+{
+  "name": "coc-ecdict",
+  "version": "0.1.0",
+  "description": "ECDICT extension for coc.nvim",
+  "author": "Heyward Fann <fannheyward@gmail.com>",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "coc.nvim"
+  ],
+  "engines": {
+    "coc": "^0.0.73"
+  },
+  "scripts": {
+    "clean": "rimraf lib",
+    "watch": "webpack --watch",
+    "build": "webpack",
+    "prepare": "npx npm-run-all clean build"
+  },
+  "devDependencies": {
+    "@types/got": "^9.6.7",
+    "@types/node": "^12.7.1",
+    "coc.nvim": "^0.0.73",
+    "got": "^9.6.0",
+    "rimraf": "^3.0.0",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.6.2",
+    "vscode-languageserver-protocol": "3.15.0-next.8",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.6"
+  }
+}
