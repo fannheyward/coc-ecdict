@@ -44,17 +44,15 @@ async function ecdictInit(ecdictPath: string): Promise<void> {
     readline
       .createInterface(createReadStream(ecdictPath), undefined, undefined, false)
       .on('line', (line: string) => {
-        line.split('\n').forEach((line: string) => {
-          const items = line.split(',');
-          if (items.length < 5) {
-            return;
-          }
-          ecdictData.set(items[0].toLowerCase(), {
-            phonetic: items[1] || '',
-            definition: items[2] || '',
-            translation: items[3] || '',
-            pos: items[4] || ''
-          });
+        const items = line.split(',');
+        if (items.length < 5) {
+          return;
+        }
+        ecdictData.set(items[0].toLowerCase(), {
+          phonetic: items[1] || '',
+          definition: items[2] || '',
+          translation: items[3] || '',
+          pos: items[4] || ''
         });
       })
       .on('close', () => {
