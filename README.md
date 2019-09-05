@@ -1,6 +1,6 @@
 # coc-ecdict
 
-ECDICT extension for coc.nvim. Inspired by [edict.ts](https://github.com/iamcco/dotfiles/blob/master/nvim/coc-extensions-source/src/edict.ts), and thanks for [ECDICT](https://github.com/skywind3000/ECDICT).
+ECDICT extension for coc.nvim. Inspired by [edict.ts](https://github.com/iamcco/dotfiles/commit/0885d76a9b1fff98ad19ab5f1892cdd910bbba99#diff-cbb8dd59854b560f9ecafdfad5d3cc4d), and thanks for [ECDICT](https://github.com/skywind3000/ECDICT).
 
 ## Install
 
