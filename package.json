@@ -8,6 +8,10 @@
   "keywords": [
     "coc.nvim"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fannheyward/coc-ecdict.git"
+  },
   "engines": {
     "coc": "^0.0.73"
   },
