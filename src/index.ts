@@ -1,5 +1,4 @@
 import { ExtensionContext, languages, workspace } from 'coc.nvim';
-import { getAgent } from 'coc.nvim/lib/model/fetch';
 import { createReadStream, createWriteStream, existsSync, mkdirSync } from 'fs';
 import got from 'got';
 import { join } from 'path';
@@ -16,11 +15,10 @@ export async function download(path: string, url: string, name: string): Promise
   statusItem.text = `Downloading ${name} data...`;
   statusItem.show();
 
-  const agent = getAgent('https');
   return new Promise((resolve, reject) => {
     try {
       got
-        .stream(url, { agent })
+        .stream(url)
         .on('downloadProgress', progress => {
           let p = (progress.percent * 100).toFixed(0);
           statusItem.text = `${p}% Downloading ${name} data...`;
@@ -39,74 +37,56 @@ export async function download(path: string, url: string, name: string): Promise
   });
 }
 
-function getWordByIndex (word: string, idx: number) {
+function getWordByIndex(word: string, idx: number) {
   while (/[-_]/.test(word[idx])) {
-    idx += 1
+    idx += 1;
   }
   if (idx == word.length) {
-    idx -= 1
+    idx -= 1;
     while (/[-_]/.test(word[idx])) {
-      idx -= 1
+      idx -= 1;
     }
   }
   if (idx < 0) {
-    return ''
+    return '';
   }
-  let start = idx
-  let end = idx + 1
+  let start = idx;
+  let end = idx + 1;
   while (start > 0) {
     if (/[A-Z]/.test(word[start])) {
-      start = start
-      break
+      start = start;
+      break;
     } else if (/[-_]/.test(word[start])) {
-      start += 1
-      break
+      start += 1;
+      break;
     }
-    start -= 1
+    start -= 1;
   }
   while (end < word.length) {
     if (/[A-Z_-]/.test(word[end])) {
-      end -= 1
-      break
+      end -= 1;
+      break;
     }
-    end += 1
+    end += 1;
   }
-  return word.slice(start, end + 1)
+  return word.slice(start, end + 1);
 }
 
-function formatDoc (word: string, words: Record<string, string>) {
-  let values = [
-    `**${word}**`,
-  ]
+function formatDoc(word: string, words: Record<string, string>) {
+  let values = [`**${word}**`];
   if (words.phonetic) {
-    values = values.concat([
-      '',
-      `**音标：**${words.phonetic}`,
-    ])
+    values = values.concat(['', `**音标：**${words.phonetic}`]);
   }
   if (words.definition) {
-    values = values.concat([
-      '',
-      '**英文解释：**',
-      '',
-      ...words.definition.split('\\n').map((line: string) => line.replace(/^"/, '')),
-    ])
+    values = values.concat(['', '**英文解释：**', '', ...words.definition.split('\\n').map((line: string) => line.replace(/^"/, ''))]);
   }
   if (words.translation) {
-    values = values.concat([
-      '',
-      '**中文解释：**',
-      '',
-      ...words.translation.split('\\n').map((line: string) => line.replace(/^"/, '')),
-    ])
+    values = values.concat(['', '**中文解释：**', '', ...words.translation.split('\\n').map((line: string) => line.replace(/^"/, ''))]);
   }
   if (words.pos) {
-    values = values.concat([
-      '',
-      `**词语位置：**${words.pos.replace(/\n/, ' ')}`
-    ])
+    values = values.concat(['', `**词语位置：**${words.pos.replace(/\n/, ' ')}`]);
   }
-  return values
+  return values;
 }
 
 async function ecdictInit(ecdictPath: string): Promise<void> {
@@ -155,23 +135,23 @@ export async function activate(context: ExtensionContext): Promise<void> {
           return null;
         }
         const wordText = document.getText(wordRange);
-        let word = wordText
+        let word = wordText;
         if (!word) {
           return null;
         }
-        let words = ecdictData.get(word.toLowerCase())
+        let words = ecdictData.get(word.toLowerCase());
         if (!words) {
-          word = wordText.replace(/((\B[A-Z])|-+|_+)/g, ' $2')
-          words = ecdictData.get(word.toLowerCase())
+          word = wordText.replace(/((\B[A-Z])|-+|_+)/g, ' $2');
+          words = ecdictData.get(word.toLowerCase());
         }
         if (!words) {
-          word = getWordByIndex(wordText, position.character - wordRange.start.character)
-          words = ecdictData.get(word.toLowerCase())
+          word = getWordByIndex(wordText, position.character - wordRange.start.character);
+          words = ecdictData.get(word.toLowerCase());
         }
         if (!words) {
-          return null
+          return null;
         }
-        const values = formatDoc(word, words)
+        const values = formatDoc(word, words);
         return {
           contents: {
             kind: MarkupKind.Markdown,
