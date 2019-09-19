@@ -54,7 +54,6 @@ function getWordByIndex(word: string, idx: number) {
   let end = idx + 1;
   while (start > 0) {
     if (/[A-Z]/.test(word[start])) {
-      start = start;
       break;
     } else if (/[-_]/.test(word[start])) {
       start += 1;
@@ -84,7 +83,7 @@ function formatDoc(word: string, words: Record<string, string>) {
     values = values.concat(['', '**中文解释：**', '', ...words.translation.split('\\n').map((line: string) => line.replace(/^"/, ''))]);
   }
   if (words.pos) {
-    values = values.concat(['', `**词语位置：**${words.pos.replace(/\n/, ' ')}`]);
+    values = values.concat(['', `**词语位置：**${words.pos.replace(/\n/g, ' ')}`]);
   }
   return values;
 }
