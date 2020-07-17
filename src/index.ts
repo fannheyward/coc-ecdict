@@ -19,7 +19,7 @@ export async function download(path: string, url: string, name: string): Promise
     try {
       got
         .stream(url)
-        .on('downloadProgress', progress => {
+        .on('downloadProgress', (progress) => {
           let p = (progress.percent * 100).toFixed(0);
           statusItem.text = `${p}% Downloading ${name} data...`;
         })
@@ -27,7 +27,7 @@ export async function download(path: string, url: string, name: string): Promise
           statusItem.hide();
           resolve();
         })
-        .on('error', e => {
+        .on('error', (e) => {
           reject(e);
         })
         .pipe(createWriteStream(path));
@@ -72,24 +72,24 @@ function getWordByIndex(word: string, idx: number) {
 }
 
 function formatDoc(word: string, words: Record<string, string>) {
-  let values = [`**${word}**`];
+  let values = [`_${word}_`];
   if (words.phonetic) {
-    values = values.concat(['', `**音标：**${words.phonetic}`]);
+    values = values.concat(['', `__音标：__${words.phonetic}`]);
   }
   if (words.definition) {
-    values = values.concat(['', '**英文解释：**', '', ...words.definition.split('\\n').map((line: string) => line.replace(/^"/, ''))]);
+    values = values.concat(['', '__英文解释：__', '', ...words.definition.split('\\n').map((line: string) => line.replace(/^"/, ''))]);
   }
   if (words.translation) {
-    values = values.concat(['', '**中文解释：**', '', ...words.translation.split('\\n').map((line: string) => line.replace(/^"/, ''))]);
+    values = values.concat(['', '__中文解释：__', '', ...words.translation.split('\\n').map((line: string) => line.replace(/^"/, ''))]);
   }
   if (words.pos) {
-    values = values.concat(['', `**词语位置：**${words.pos.replace(/\n/g, ' ')}`]);
+    values = values.concat(['', `__词语位置：__${words.pos.replace(/\n/g, ' ')}`]);
   }
   return values;
 }
 
 async function ecdictInit(ecdictPath: string): Promise<void> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     readline
       .createInterface(createReadStream(ecdictPath), undefined, undefined, false)
       .on('line', (line: string) => {
@@ -101,7 +101,7 @@ async function ecdictInit(ecdictPath: string): Promise<void> {
           phonetic: items[1] || '',
           definition: items[2] || '',
           translation: items[3] || '',
-          pos: items[4] || ''
+          pos: items[4] || '',
         });
       })
       .on('close', () => {
@@ -154,10 +154,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
         return {
           contents: {
             kind: MarkupKind.Markdown,
-            value: values.join('\n')
-          }
+            value: values.join('\n'),
+          },
         };
-      }
+      },
     })
   );
 }

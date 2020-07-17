@@ -19,4 +19,5 @@ Lookup the keyword under cursor with `K`, and shows translation in preview/float
 MIT
 
 ---
+
 > This extension is created by [create-coc-extension](https://github.com/fannheyward/create-coc-extension)
