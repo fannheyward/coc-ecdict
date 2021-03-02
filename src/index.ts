@@ -1,40 +1,37 @@
-import { ExtensionContext, languages, workspace } from 'coc.nvim';
+import { ExtensionContext, Hover, languages, window, workspace } from 'coc.nvim';
 import { createReadStream, createWriteStream, existsSync, mkdirSync } from 'fs';
-import got from 'got';
+import fetch from 'node-fetch';
 import { join } from 'path';
 import readline from 'readline';
-import { Hover, MarkupKind } from 'vscode-languageserver-protocol';
+import stream from 'stream';
+import util from 'util';
+const pipeline = util.promisify(stream.pipeline);
 
 const ecdictName = 'ecdict.csv';
 const ecdictUrl = 'https://raw.githubusercontent.com/skywind3000/ECDICT/master/ecdict.csv';
 
 const ecdictData = new Map();
 
-export async function download(path: string, url: string, name: string): Promise<void> {
-  let statusItem = workspace.createStatusBarItem(0, { progress: true });
-  statusItem.text = `Downloading ${name} data...`;
+async function download(dest: string, url: string, name: string): Promise<void> {
+  const statusItem = window.createStatusBarItem(0, { progress: true });
+  statusItem.text = `Downloading ${name}...`;
   statusItem.show();
 
-  return new Promise((resolve, reject) => {
-    try {
-      got
-        .stream(url)
-        .on('downloadProgress', (progress) => {
-          let p = (progress.percent * 100).toFixed(0);
-          statusItem.text = `${p}% Downloading ${name} data...`;
-        })
-        .on('end', () => {
-          statusItem.hide();
-          resolve();
-        })
-        .on('error', (e) => {
-          reject(e);
-        })
-        .pipe(createWriteStream(path));
-    } catch (e) {
-      reject(e);
-    }
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    statusItem.hide();
+    throw new Error('Download failed');
+  }
+
+  const destFileStream = createWriteStream(dest);
+  await pipeline(resp.body, destFileStream);
+  await new Promise<void>((resolve) => {
+    destFileStream.on('close', resolve);
+    destFileStream.destroy();
+    setTimeout(resolve, 1000);
   });
+
+  statusItem.hide();
 }
 
 function getWordByIndex(word: string, idx: number) {
@@ -117,14 +114,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const ecdictPath = join(context.storagePath, ecdictName);
   if (!existsSync(ecdictPath)) {
     await download(ecdictPath, ecdictUrl, 'ECDICT');
-    await ecdictInit(ecdictPath);
-  } else {
-    await ecdictInit(ecdictPath);
   }
 
   context.subscriptions.push(
     languages.registerHoverProvider(['*'], {
-      provideHover(document, position): Hover | null {
+      async provideHover(document, position): Promise<Hover | null> {
         const doc = workspace.getDocument(document.uri);
         if (!doc) {
           return null;
@@ -137,6 +131,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
         let word = wordText;
         if (!word) {
           return null;
+        }
+        if (!ecdictData.size) {
+          await ecdictInit(ecdictPath);
         }
         let words = ecdictData.get(word.toLowerCase());
         if (!words) {
@@ -153,7 +150,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         const values = formatDoc(word, words);
         return {
           contents: {
-            kind: MarkupKind.Markdown,
+            kind: 'markdown',
             value: values.join('\n'),
           },
         };
